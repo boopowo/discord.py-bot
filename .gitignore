@@ -1,5 +1,7 @@
+#Heccing random files
 /.vscode/
 /cogs/__pycache__/
+.gitignore
 
 #ignores json files
 UserList.json

@@ -70,32 +70,34 @@ class UserList(commands.Cog):
     
     @commands.command()
     async def create_backup_userlist(self, ctx):
-        print("CREATING BACKUP {}".format(current_time()))
-        await ctx.send("CREATING BACKUP")
+        print("CREATING BACKUP FOR USER LIST {}".format(current_time()))
+        await ctx.send("CREATING BACKUP FOR USER LIST")
+        sorted_userlist = dict(sorted(self.user_list.items(), key=lambda x:x[1], reverse = True))
         backup = []
-        for user in self.user_list:
+        for user in sorted_userlist:
             item = {
                 "name": user,
-                "value": self.user_list[user]
+                "value": sorted_userlist[user]
             }
             backup.append(item)
         with open('{}backup_{}'.format(backup_folder,f_name), 'w') as f:
-            json.dump(backup, f)
-        print("BACKUP SUCCESSFUL {}".format(current_time()))
-        await ctx.send("BACKUP SUCCESSFUL")
+            json.dump(backup, f, indent=4)
+        print("BACKUP SUCCESSFUL FOR USER LIST {}".format(current_time()))
+        await ctx.send("BACKUP SUCCESSFUL FOR USER LIST")
     
     @tasks.loop(seconds = update_time)
     async def update(self):
         print("Updating User file automatically {}".format(current_time()))
+        sorted_userlist = dict(sorted(self.user_list.items(), key=lambda x:x[1], reverse = True))
         lst = []
-        for user in self.user_list:
+        for user in sorted_userlist:
             item = {
                 "name": user,
-                "value": self.user_list[user]
+                "value": sorted_userlist[user]
             }
             lst.append(item)
         with open(f_name, 'w') as f:
-            json.dump(lst, f)
+            json.dump(lst, f, indent=4)
         print("Update User file successful {}".format(current_time()))
     
     @update.before_loop
@@ -110,7 +112,7 @@ class UserList(commands.Cog):
         else:
             print('{} does not exist. Creating file {}'.format(f_name, current_time()))
             with open(f_name, 'w') as f:
-                json.dump([], f)
+                json.dump([], f, indent=4)
             print('{} created {}'.format(f_name, current_time()))
         
         await self.client.wait_until_ready()
