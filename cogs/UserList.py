@@ -1,6 +1,7 @@
 import discord 
 import datetime 
 import json
+import os
 
 from discord.ext import commands
 from discord.ext import tasks
@@ -9,6 +10,7 @@ from datetime import datetime
 
 f_name = 'UserList.json'
 backup_folder = './backups/'
+update_time = 60
 
 def current_time():
     return datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -27,7 +29,7 @@ class UserList(commands.Cog):
     async def on_message(self, message):
         if message.author == self.client.user:
             return
-        user = message.author
+        user = str(message.author)
         if user in self.user_list:
             self.user_list[user] += 1
         else:
@@ -46,7 +48,7 @@ class UserList(commands.Cog):
         output = ""
         for user in self.user_list:
             output += '{}: {}\n '.format(user, self.user_list[user])
-        await ctx.send('```This is the list of all users and the times they have sent a message:\n {}```'.format(output))
+        await ctx.send('```This is the list of users and the times they have sent a message:\n {}```'.format(output))
     
     @commands.command()
     async def clear_userlist(self, ctx):
@@ -75,7 +77,7 @@ class UserList(commands.Cog):
         print("BACKUP SUCCESSFUL {}".format(current_time()))
         await ctx.send("BACKUP SUCCESSFUL")
     
-    @tasks.loop(seconds = 300)
+    @tasks.loop(seconds = update_time)
     async def update(self):
         print("Updating User file automatically {}".format(current_time()))
         lst = []
@@ -91,12 +93,18 @@ class UserList(commands.Cog):
     
     @update.before_loop
     async def before_update(self):
-        print('Read User file {}'.format(current_time()))
-        with open(f_name) as f:
-            user_data = json.load(f)
-        for users in user_data:
-            self.user_list[users['name']] = users['value']
-        print("Read User file successful {}".format((current_time())))
+        if os.path.exists(f_name):
+            print('Read User file {}'.format(current_time()))
+            with open(f_name) as f:
+                user_data = json.load(f)
+            for users in user_data:
+                self.user_list[users['name']] = users['value']
+            print("Read User file successful {}".format((current_time())))
+        else:
+            print('{} does not exist. Creating file {}'.format(f_name, current_time()))
+            with open(f_name, 'w') as f:
+                json.dump([], f)
+        
         await self.client.wait_until_ready()
     
 def setup(client):

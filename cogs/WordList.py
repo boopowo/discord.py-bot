@@ -1,6 +1,7 @@
 import discord 
 import datetime 
 import json
+import os
 
 from discord.ext import commands
 from discord.ext import tasks
@@ -9,6 +10,7 @@ from datetime import datetime
 
 f_name = 'WordList.json'
 backup_folder = './backups/'
+update_time = 60
 
 def current_time():
     return datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -82,7 +84,7 @@ class WordList(commands.Cog):
         print("BACKUP SUCCESSFUL {}".format(current_time()))
         await ctx.send("BACKUP SUCCESSFUL")
 
-    @tasks.loop(seconds = 300)
+    @tasks.loop(seconds = update_time)
     async def update(self):
         print("Updating Word List file automatically {}".format(current_time()))
         lst = []
@@ -98,12 +100,17 @@ class WordList(commands.Cog):
 
     @update.before_loop
     async def before_update(self):
-        print('Read Word List file {}'.format(current_time()))
-        with open(f_name) as f:
-            word_data = json.load(f)
-        for words in word_data:
-            self.word_list[words['word']] = words['value']
-        print("Read Word List file successful {}".format(current_time()))
+        if os.path.exists(f_name):
+            print('Read Word List file {}'.format(current_time()))
+            with open(f_name) as f:
+                word_data = json.load(f)
+            for words in word_data:
+                self.word_list[words['word']] = words['value']
+            print("Read Word List file successful {}".format(current_time()))
+        else:
+            print('{} does not exist. Creating file {}'.format(f_name, current_time()))
+            with open(f_name, 'w') as f:
+                json.dump([], f)
         await self.client.wait_until_ready()
 
 def setup(client):

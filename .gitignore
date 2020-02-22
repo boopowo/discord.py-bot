@@ -1,0 +1,8 @@
+/.vscode/
+/cogs/__pycache__/
+
+#ignores json files
+UserList.json
+WordList.json
+/backups/backup_WordList.json
+/backups/backup_UserList.json
