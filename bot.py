@@ -8,7 +8,7 @@ from datetime import datetime
 
 client = commands.Bot(command_prefix = '/')
 cog_dir = './cogs'
-token = 'TOKEN'
+token = 'YEET!'
 
 def current_time():
     return datetime.now().strftime("%m/%d/%Y %H:%M:%S")

@@ -10,7 +10,7 @@ from datetime import datetime
 
 f_name = 'WordList.json'
 backup_folder = './backups/'
-update_time = 60
+update_time = 300
 
 def current_time():
     return datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -48,25 +48,34 @@ class WordList(commands.Cog):
     @commands.command()
     async def show_word(self, ctx, word):
         word = word.lower()
-        await ctx.send('{} has appeared: {} times'.format(word, self.word_list[word]))
+        if word in self.word_list:
+            await ctx.send('{} has appeared: {} times'.format(word, self.word_list[word]))
+        else:
+            await ctx.send('Cannot find message with {} '.format(word))
 
     @commands.command()
     async def show_wordlist(self, ctx):
+        sorted_wordlist = dict(sorted(self.word_list.items(), key = lambda x:x[1], reverse = True))
         output = ""
-        for word in self.word_list:
-            output += '{}: {}\n '.format(word, self.word_list[word])
-        await ctx.send('```This is the list of words and times it has appeared:\n {}```'.format(output))
-    
+        count = 0
+        for word in sorted_wordlist:
+            output += '{}: {} times\n '.format(word, sorted_wordlist[word])
+            count+= 1
+            if count >= 25:
+                break
+        await ctx.send('```Top 25 words:\n {}```'.format(output))
+            
     @commands.command()
     async def clear_wordlist(self, ctx):
-        print("CLEARING WORD LIST FILE {}".format(current_time()))
-        await ctx.send("CLEARING WORD LIST FILE")
-        lst = []
-        with open(f_name, 'w') as f:
-            json.dump(lst, f)
-        self.word_list.clear()
-        print("WORD LIST FILE CLEARED {}".format(current_time()))
-        await ctx.send('WORD LIST FILE CLEARED SUCCESSFULLY')
+        await ctx.send('Yeah right')
+        # print("CLEARING WORD LIST FILE {}".format(current_time()))
+        # await ctx.send("CLEARING WORD LIST FILE")
+        # lst = []
+        # with open(f_name, 'w') as f:
+        #     json.dump(lst, f)
+        # self.word_list.clear()
+        # print("WORD LIST FILE CLEARED {}".format(current_time()))
+        # await ctx.send('WORD LIST FILE CLEARED SUCCESSFULLY')
     
     @commands.command()
     async def create_backup_wordlist(self, ctx):
@@ -111,6 +120,7 @@ class WordList(commands.Cog):
             print('{} does not exist. Creating file {}'.format(f_name, current_time()))
             with open(f_name, 'w') as f:
                 json.dump([], f)
+            print('{} created {}'.format(f_name, current_time()))
         await self.client.wait_until_ready()
 
 def setup(client):
