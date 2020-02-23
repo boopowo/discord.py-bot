@@ -29,6 +29,8 @@ class UserList(commands.Cog):
     async def on_message(self, message):
         if message.author == self.client.user:
             return
+        elif message.content.startswith('/'):
+            return
         user = message.author.id
         if user in self.user_list:
             self.user_list[user] += 1
