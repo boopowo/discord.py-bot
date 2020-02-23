@@ -20,6 +20,8 @@ class ErrorHandling(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             #print('Command not found {}'.format(current_time()))
             await ctx.send('Command not found')
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send('Missing required argument')
         else:
             print('{} {}'.format(error, current_time()))
 

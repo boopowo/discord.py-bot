@@ -49,7 +49,7 @@ class WordList(commands.Cog):
     async def show_word(self, ctx, word):
         word = word.lower()
         if word in self.word_list:
-            await ctx.send('{} has appeared: {} times'.format(word, self.word_list[word]))
+            await ctx.send('"{}" has appeared: {} times'.format(word, self.word_list[word]))
         else:
             await ctx.send('Cannot find message with {} '.format(word))
 
@@ -57,13 +57,13 @@ class WordList(commands.Cog):
     async def show_wordlist(self, ctx):
         sorted_wordlist = dict(sorted(self.word_list.items(), key = lambda x:x[1], reverse = True))
         output = ""
-        count = 0
+        rank = 1
         for word in sorted_wordlist:
-            output += '{}: {} times\n '.format(word, sorted_wordlist[word])
-            count+= 1
-            if count >= 25:
+            output += '{:<10} {:<40} {:<10}\n'.format(str(rank), str(word), str(sorted_wordlist[word]))
+            rank += 1
+            if rank > 25:
                 break
-        await ctx.send('```Top 25 words:\n {}```'.format(output))
+        await ctx.send('```{}\n{:<10} {:<40} {:<10}\n{}```'.format("Top 25 words:", "Rank:", "Word:", "Frequency:", output))
             
     @commands.command()
     async def clear_wordlist(self, ctx):

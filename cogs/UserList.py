@@ -29,32 +29,42 @@ class UserList(commands.Cog):
     async def on_message(self, message):
         if message.author == self.client.user:
             return
-        user = str(message.author)
+        user = message.author.id
         if user in self.user_list:
             self.user_list[user] += 1
         else:
             self.user_list[user] = 1
 
     @commands.command()
-    async def show_user(self, ctx, user):
-        user = user.capitalize()
+    async def show_user(self, ctx, *, userIn):
+        user = ""
+        for i in range(len(userIn)):
+            if userIn[i].isalnum():
+                user += userIn[i]
+        user = int(user)
         if user in self.user_list:
-            await ctx.send('{} has: {} messages'.format(user, self.user_list[user]))
+            sorted_userlist = dict(sorted(self.user_list.items(), key=lambda x:x[1], reverse = True))
+            rank = 1
+            for i in sorted_userlist:
+                if i == user:
+                    break
+                rank += 1
+            await ctx.send('{} has sent: {} messages and is #{} in rankings'.format(self.client.get_user(user), sorted_userlist[user], rank))
         else:
-            await ctx.send('Cannot find user {}'.format(user))
+            await ctx.send('Cannot find user')
     
     @commands.command()
     async def show_userlist(self, ctx):
         sorted_userlist = dict(sorted(self.user_list.items(), key=lambda x:x[1], reverse = True))
         output = ""
-        count = 0
+        rank = 1
         for user in sorted_userlist:
-            output += "{}: {} messages\n ".format(user, sorted_userlist[user])
-            count += 1
-            if count >= 25:
+            output += '{:<10} {:<40} {:<10}\n'.format(str(rank),str(self.client.get_user(user)),str(sorted_userlist[user]))
+            rank += 1
+            if rank > 25:
                 break
         
-        await ctx.send('```Top chatters:\n {}```'.format(output))
+        await ctx.send("```{}\n{:<10} {:<40} {:<10}\n{}```".format("Top 25 users:", "Rank:", "User:", "Frequency:", output))
 
     @commands.command()
     async def clear_userlist(self, ctx):
@@ -76,7 +86,7 @@ class UserList(commands.Cog):
         backup = []
         for user in sorted_userlist:
             item = {
-                "name": user,
+                "id": user,
                 "value": sorted_userlist[user]
             }
             backup.append(item)
@@ -92,7 +102,7 @@ class UserList(commands.Cog):
         lst = []
         for user in sorted_userlist:
             item = {
-                "name": user,
+                "id": user,
                 "value": sorted_userlist[user]
             }
             lst.append(item)
